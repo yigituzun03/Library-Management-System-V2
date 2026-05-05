@@ -21,10 +21,6 @@ public class Main {
     private static final Scanner scanner = new Scanner(System.in);
     private static final LibraryManager manager = LibraryManager.getInstance();
 
-    // =========================================================
-    //  DISPLAY HELPERS
-    // =========================================================
-
     private static final String LINE  = "  +----------------------------------------------------------+";
     private static final String THIN  = "  +----------------------------------------------------------+";
     private static final String BLANK = "  |                                                          |";
@@ -62,11 +58,6 @@ public class Main {
         return repeat(" ", left) + text + repeat(" ", right);
     }
 
-    // =========================================================
-    //  INPUT HELPERS — Basic
-    // =========================================================
-
-    /** Reads an integer, re-prompts on invalid input. */
     private static int readInt(String prompt) {
         while (true) {
             System.out.print("  " + prompt);
@@ -78,7 +69,6 @@ public class Main {
         }
     }
 
-    /** Reads a non-empty string, re-prompts if blank. */
     private static String readRequired(String prompt) {
         while (true) {
             System.out.print("  " + prompt);
@@ -88,7 +78,6 @@ public class Main {
         }
     }
 
-    /** Reads an optional string (blank = keep unchanged). */
     private static String readOptional(String prompt) {
         System.out.print("  " + prompt);
         return scanner.nextLine().trim();
@@ -104,14 +93,6 @@ public class Main {
         }
     }
 
-    // =========================================================
-    //  INPUT HELPERS — Validated (used in Create flow)
-    // =========================================================
-
-    /**
-     * Reads and validates an author name.
-     * Allowed: letters, spaces, hyphens, apostrophes, dots. Min 2 chars.
-     */
     private static String readAuthor(String prompt) {
         while (true) {
             String val = readRequired(prompt);
@@ -125,9 +106,6 @@ public class Main {
         return s.length() >= 2 && s.matches("[a-zA-Z\\s\\-'.,]+");
     }
 
-    /**
-     * Reads and validates an ISBN (exactly 13 digits, no hyphens, starts with 978 or 979).
-     */
     private static String readIsbn(String prompt) {
         while (true) {
             String val = readRequired(prompt);
@@ -143,9 +121,6 @@ public class Main {
         return s.startsWith("978") || s.startsWith("979");
     }
 
-    /**
-     * Reads and validates a publication year (1000 to current year + 1).
-     */
     private static int readYear(String prompt) {
         int maxYear = java.util.Calendar.getInstance().get(java.util.Calendar.YEAR) + 1;
         while (true) {
@@ -155,11 +130,8 @@ public class Main {
         }
     }
 
-    // =========================================================
-    //  MAIN
-    // =========================================================
     public static void main(String[] args) {
-        // Default members for demonstration
+
         manager.registerMember(new Member("M001", "Alice"));
         manager.registerMember(new Member("M002", "Bob"));
 
@@ -203,9 +175,6 @@ public class Main {
         }
     }
 
-    // =========================================================
-    //  [1] CREATE BOOK
-    // =========================================================
     private static void createBookFlow() {
         header("CREATE BOOK");
 
@@ -262,27 +231,22 @@ public class Main {
         }
     }
 
-    /**
-     * Per-slot list editor used in Modify Book.
-     * - Existing slots: Enter = keep, new value = replace, "-" = remove
-     * - Empty slots: Enter = done, new value = add
-     */
     private static List<String> editSlots(List<String> current, String label) {
         List<String> result = new ArrayList<>();
         for (int i = 0; i < 3; i++) {
             if (i < current.size()) {
-                // Existing slot — keep, replace, or remove
+
                 System.out.printf("  %s %d [%s]: ", label, i + 1, current.get(i));
                 String input = scanner.nextLine().trim();
                 if (input.isEmpty()) {
-                    result.add(current.get(i));   // keep
+                    result.add(current.get(i));   
                 } else if (input.equals("-")) {
-                    info(label + " " + (i + 1) + " removed."); // drop it
+                    info(label + " " + (i + 1) + " removed."); 
                 } else {
-                    result.add(input);             // replace
+                    result.add(input);             
                 }
             } else {
-                // Empty slot — add new or stop
+
                 System.out.printf("  %s %d [(empty, Enter to stop)]: ", label, i + 1);
                 String input = scanner.nextLine().trim();
                 if (input.isEmpty()) break;
@@ -292,9 +256,6 @@ public class Main {
         return result;
     }
 
-    // =========================================================
-    //  [2] SEARCH BOOK  (Strategy Pattern)
-    // =========================================================
     private static void searchBookFlow() {
         header("SEARCH BOOK");
 
@@ -321,7 +282,6 @@ public class Main {
 
         String keyword = readRequired("Keyword     : ");
 
-        // Sort is only applicable when searching by Title (per project spec)
         if (searchChoice.equals("1")) {
             sectionTitle("Sort Order");
             System.out.println("  [1] Title A -> Z");
@@ -350,9 +310,6 @@ public class Main {
         }
     }
 
-    // =========================================================
-    //  [5] MODIFY BOOK  (Command Pattern)
-    // =========================================================
     private static void modifyBookFlow() {
         header("MODIFY BOOK");
 
@@ -374,12 +331,11 @@ public class Main {
         }
 
         Book target  = inventory.get(index);
-        Book newData = new Book(target); // deep copy
+        Book newData = new Book(target); 
 
         sectionTitle("Edit Fields  (press Enter to keep current value)");
         String v;
 
-        // --- Title ---
         while (true) {
             System.out.printf("  Title       [%s]: ", target.getTitle());
             v = scanner.nextLine().trim();
@@ -392,7 +348,6 @@ public class Main {
             break;
         }
 
-        // --- Author ---
         while (true) {
             System.out.printf("  Author      [%s]: ", target.getAuthor());
             v = scanner.nextLine().trim();
@@ -410,7 +365,6 @@ public class Main {
             break;
         }
 
-        // --- Year ---
         int maxYear = java.util.Calendar.getInstance().get(java.util.Calendar.YEAR) + 1;
         while (true) {
             System.out.printf("  Year        [%d]: ", target.getPublicationYear());
@@ -433,7 +387,6 @@ public class Main {
             }
         }
 
-        // --- ISBN ---
         while (true) {
             System.out.printf("  ISBN        [%s]: ", target.getIsbn());
             v = scanner.nextLine().trim();
@@ -451,7 +404,6 @@ public class Main {
             break;
         }
 
-        // --- Publisher ---
         while (true) {
             System.out.printf("  Publisher   [%s]: ", target.getPublisher());
             v = scanner.nextLine().trim();
@@ -477,9 +429,6 @@ public class Main {
         manager.modifyBook(target, newData);
     }
 
-    // =========================================================
-    //  [3] BORROW BOOK
-    // =========================================================
     private static void borrowBookFlow() {
         header("BORROW BOOK");
 
@@ -496,9 +445,6 @@ public class Main {
         manager.borrowBook(book, member);
     }
 
-    // =========================================================
-    //  [4] RETURN BOOK
-    // =========================================================
     private static void returnBookFlow() {
         header("RETURN BOOK");
 
@@ -523,9 +469,6 @@ public class Main {
         manager.returnBook(borrowed.get(idx), member);
     }
 
-    // =========================================================
-    //  [7] LIST ALL BOOKS
-    // =========================================================
     private static void listAllBooks() {
         header("ALL BOOKS");
         List<Book> inventory = manager.getInventory();
@@ -543,9 +486,6 @@ public class Main {
         System.out.println("  " + repeat("-", 60));
     }
 
-    // =========================================================
-    //  HELPER: Member selection from list
-    // =========================================================
     private static Member selectMember() {
         List<Member> members = manager.getMembers();
         if (members.isEmpty()) {
@@ -565,9 +505,6 @@ public class Main {
         return members.get(idx);
     }
 
-    // =========================================================
-    //  HELPER: Book selection via title search
-    // =========================================================
     private static Book selectBookFromSearch() {
         sectionTitle("Find Book");
         String keyword = readRequired("Search by title: ");
@@ -596,9 +533,6 @@ public class Main {
         return results.get(idx);
     }
 
-    // =========================================================
-    //  HELPER: Print full book details
-    // =========================================================
     private static void printBookDetail(Book book) {
         String status = book.isAvailable() ? "Available" : "Borrowed";
         String cats   = book.getCategories().isEmpty() ? "(none)" : String.join(", ", book.getCategories());

@@ -2,9 +2,6 @@ package com.library.command;
 
 import java.util.Stack;
 
-/**
- * Maintains a LIFO stack of executed commands to support undo functionality.
- */
 public class CommandHistory {
 
     private Stack<ICommand> history = new Stack<>();

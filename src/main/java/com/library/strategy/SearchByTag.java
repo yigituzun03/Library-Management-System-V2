@@ -4,9 +4,6 @@ import com.library.model.Book;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Strategy: Kitabın etiketleri (tags) arasında anahtar kelimeyi arar.
- */
 public class SearchByTag implements ISearchStrategy {
     @Override
     public List<Book> search(List<Book> inventory, String keyword) {
@@ -15,7 +12,7 @@ public class SearchByTag implements ISearchStrategy {
             for (String tag : book.getTags()) {
                 if (tag.toLowerCase().contains(keyword.toLowerCase())) {
                     results.add(book);
-                    break; // Aynı kitabı birden fazla kez eklememek için
+                    break; 
                 }
             }
         }

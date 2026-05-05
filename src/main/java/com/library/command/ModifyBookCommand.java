@@ -2,15 +2,11 @@ package com.library.command;
 
 import com.library.model.Book;
 
-/**
- * Concrete command that modifies a book's fields and supports undo
- * by restoring a deep-copy backup taken before execution.
- */
 public class ModifyBookCommand implements ICommand {
 
-    private Book targetBook; // The actual book object to modify
-    private Book backupBook; // Snapshot taken before execution (for undo)
-    private Book newData;    // The new field values to apply
+    private Book targetBook; 
+    private Book backupBook; 
+    private Book newData;    
 
     public ModifyBookCommand(Book targetBook, Book newData) {
         this.targetBook = targetBook;
@@ -19,10 +15,9 @@ public class ModifyBookCommand implements ICommand {
 
     @Override
     public void execute() {
-        // 1. Snapshot current state (deep copy)
+
         this.backupBook = new Book(targetBook);
 
-        // 2. Apply new data
         targetBook.setTitle(newData.getTitle());
         targetBook.setAuthor(newData.getAuthor());
         targetBook.setPublicationYear(newData.getPublicationYear());

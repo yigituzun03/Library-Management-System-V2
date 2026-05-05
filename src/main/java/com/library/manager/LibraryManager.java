@@ -12,36 +12,27 @@ import java.util.List;
 
 public class LibraryManager {
 
-    // Singleton instance
     private static LibraryManager instance;
 
-    // Data stores
     private List<Book>   inventory;
     private List<Member> members;
 
-    // Design pattern components
     private CommandHistory  commandHistory;
     private ISearchStrategy searchStrategy;
     private ISortStrategy   sortStrategy;
 
-    // Private constructor (Singleton)
     private LibraryManager() {
         this.inventory      = new ArrayList<>();
         this.members        = new ArrayList<>();
         this.commandHistory = new CommandHistory();
     }
 
-    // Global access point
     public static LibraryManager getInstance() {
         if (instance == null) {
             instance = new LibraryManager();
         }
         return instance;
     }
-
-    // ----------------------------------------------------------
-    //  CORE OPERATIONS
-    // ----------------------------------------------------------
 
     public void addBook(Book book) {
         inventory.add(book);
@@ -68,10 +59,6 @@ public class LibraryManager {
     public List<Member> getMembers() {
         return members;
     }
-
-    // ----------------------------------------------------------
-    //  BORROW / RETURN MODULE
-    // ----------------------------------------------------------
 
     public boolean borrowBook(Book book, Member member) {
         if (book.isAvailable()) {
@@ -100,10 +87,6 @@ public class LibraryManager {
         }
     }
 
-    // ----------------------------------------------------------
-    //  MODIFICATION MODULE  (Command Pattern)
-    // ----------------------------------------------------------
-
     public void modifyBook(Book targetBook, Book newData) {
         ModifyBookCommand command = new ModifyBookCommand(targetBook, newData);
         commandHistory.push(command);
@@ -112,10 +95,6 @@ public class LibraryManager {
     public void undoLastModification() {
         commandHistory.undo();
     }
-
-    // ----------------------------------------------------------
-    //  SEARCH MODULE  (Strategy Pattern)
-    // ----------------------------------------------------------
 
     public void setSearchStrategy(ISearchStrategy searchStrategy) {
         this.searchStrategy = searchStrategy;

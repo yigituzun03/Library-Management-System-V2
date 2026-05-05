@@ -15,7 +15,6 @@ public class Book {
     private boolean isAvailable;
     private int     borrowCount;
 
-    // Standard constructor — used when creating a new book
     public Book(String title, String author, int publicationYear, String isbn, String publisher) {
         this.title           = title;
         this.author          = author;
@@ -29,7 +28,6 @@ public class Book {
         this.borrowCount     = 0;
     }
 
-    // Deep-copy constructor — critical for Command Pattern undo support
     public Book(Book source) {
         this.title           = source.title;
         this.author          = source.author;
@@ -37,20 +35,18 @@ public class Book {
         this.isbn            = source.isbn;
         this.publisher       = source.publisher;
         this.description     = source.description;
-        this.categories      = new ArrayList<>(source.categories); // new list, not shared reference
+        this.categories      = new ArrayList<>(source.categories); 
         this.tags            = new ArrayList<>(source.tags);
         this.isAvailable     = source.isAvailable;
         this.borrowCount     = source.borrowCount;
     }
-
-    // Maximum 3 categories and 3 tags per book (project requirement)
 
     public boolean addCategory(String category) {
         if (this.categories.size() < 3) {
             this.categories.add(category);
             return true;
         }
-        return false; // limit reached
+        return false; 
     }
 
     public boolean addTag(String tag) {
@@ -58,7 +54,7 @@ public class Book {
             this.tags.add(tag);
             return true;
         }
-        return false; // limit reached
+        return false; 
     }
 
     public void incrementBorrowCount() {
@@ -70,8 +66,6 @@ public class Book {
         return "Book [" + title + " | " + author + " | ISBN: " + isbn
             + " | " + (isAvailable ? "Available" : "Borrowed") + "]";
     }
-
-    // Getters and Setters
 
     public String getTitle()                        { return title; }
     public void   setTitle(String title)            { this.title = title; }
