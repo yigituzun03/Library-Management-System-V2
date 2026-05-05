@@ -1,13 +1,20 @@
 package com.library;
 
-import com.library.manager.LibraryManager;
-import com.library.model.Book;
-import com.library.model.Member;
-import com.library.strategy.*;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
+
+import com.library.manager.LibraryManager;
+import com.library.model.Book;
+import com.library.model.Member;
+import com.library.strategy.ISearchStrategy;
+import com.library.strategy.SearchByAuthor;
+import com.library.strategy.SearchByCategory;
+import com.library.strategy.SearchByIsbn;
+import com.library.strategy.SearchByTag;
+import com.library.strategy.SearchByTitle;
+import com.library.strategy.TitleAscendingSortStrategy;
+import com.library.strategy.TitleDescendingSortStrategy;
 
 public class Main {
 
@@ -213,10 +220,12 @@ public class Main {
 
         sectionTitle("Categories  (max 3)");
         info("Enter categories one by one. Press Enter to skip a slot.");
+        info("  (e.g., Fiction, Science, History)");
         addCategoriesInteractively(newBook);
 
         sectionTitle("Tags  (max 3)");
         info("Enter tags one by one. Press Enter to skip a slot.");
+        info("  (e.g., Bestseller, Award-Winning, Classic)");
         addTagsInteractively(newBook);
 
         sectionTitle("Summary");
@@ -371,52 +380,88 @@ public class Main {
         String v;
 
         // --- Title ---
-        System.out.printf("  Title       [%s]: ", target.getTitle());
-        v = scanner.nextLine().trim();
-        if (!v.isEmpty()) {
-            if (v.equals(target.getTitle()))    warn("Same as current value. No change made.");
-            else                                newData.setTitle(v);
+        while (true) {
+            System.out.printf("  Title       [%s]: ", target.getTitle());
+            v = scanner.nextLine().trim();
+            if (v.isEmpty()) break;
+            if (v.equals(target.getTitle())) {
+                warn("Same as current value. No change made.");
+                break;
+            }
+            newData.setTitle(v);
+            break;
         }
 
         // --- Author ---
-        System.out.printf("  Author      [%s]: ", target.getAuthor());
-        v = scanner.nextLine().trim();
-        if (!v.isEmpty()) {
-            if (v.equals(target.getAuthor()))   warn("Same as current value. No change made.");
-            else if (!isValidAuthor(v)) {        warn("Invalid author name — field kept unchanged.");
-                                                info("Allowed: letters, spaces, hyphens, apostrophes, dots. Min 2 chars."); }
-            else                                newData.setAuthor(v);
+        while (true) {
+            System.out.printf("  Author      [%s]: ", target.getAuthor());
+            v = scanner.nextLine().trim();
+            if (v.isEmpty()) break;
+            if (v.equals(target.getAuthor())) {
+                warn("Same as current value. No change made.");
+                break;
+            }
+            if (!isValidAuthor(v)) {
+                warn("Invalid author name.");
+                info("Allowed: letters, spaces, hyphens, apostrophes, dots. Min 2 chars.");
+                continue;
+            }
+            newData.setAuthor(v);
+            break;
         }
 
         // --- Year ---
         int maxYear = java.util.Calendar.getInstance().get(java.util.Calendar.YEAR) + 1;
-        System.out.printf("  Year        [%d]: ", target.getPublicationYear());
-        v = scanner.nextLine().trim();
-        if (!v.isEmpty()) {
+        while (true) {
+            System.out.printf("  Year        [%d]: ", target.getPublicationYear());
+            v = scanner.nextLine().trim();
+            if (v.isEmpty()) break;
             try {
                 int y = Integer.parseInt(v);
-                if (y == target.getPublicationYear())       warn("Same as current value. No change made.");
-                else if (y < 1000 || y > maxYear)           warn("Year must be between 1000 and " + maxYear + " — field kept unchanged.");
-                else                                        newData.setPublicationYear(y);
-            } catch (NumberFormatException e) {             warn("Invalid year — field kept unchanged."); }
+                if (y == target.getPublicationYear()) {
+                    warn("Same as current value. No change made.");
+                    break;
+                }
+                if (y < 1000 || y > maxYear) {
+                    warn("Year must be between 1000 and " + maxYear + ".");
+                    continue;
+                }
+                newData.setPublicationYear(y);
+                break;
+            } catch (NumberFormatException e) {
+                warn("Invalid input. Please enter a valid year.");
+            }
         }
 
         // --- ISBN ---
-        System.out.printf("  ISBN        [%s]: ", target.getIsbn());
-        v = scanner.nextLine().trim();
-        if (!v.isEmpty()) {
-            if (v.equals(target.getIsbn()))     warn("Same as current value. No change made.");
-            else if (!isValidIsbn(v)) {          warn("Invalid ISBN — field kept unchanged.");
-                                                info("Must be exactly 13 digits, no hyphens (e.g. 9780132350884)"); }
-            else                                newData.setIsbn(v);
+        while (true) {
+            System.out.printf("  ISBN        [%s]: ", target.getIsbn());
+            v = scanner.nextLine().trim();
+            if (v.isEmpty()) break;
+            if (v.equals(target.getIsbn())) {
+                warn("Same as current value. No change made.");
+                break;
+            }
+            if (!isValidIsbn(v)) {
+                warn("Invalid ISBN.");
+                info("Must be exactly 13 digits, no hyphens (e.g. 9780132350884)");
+                continue;
+            }
+            newData.setIsbn(v);
+            break;
         }
 
         // --- Publisher ---
-        System.out.printf("  Publisher   [%s]: ", target.getPublisher());
-        v = scanner.nextLine().trim();
-        if (!v.isEmpty()) {
-            if (v.equals(target.getPublisher())) warn("Same as current value. No change made.");
-            else                                 newData.setPublisher(v);
+        while (true) {
+            System.out.printf("  Publisher   [%s]: ", target.getPublisher());
+            v = scanner.nextLine().trim();
+            if (v.isEmpty()) break;
+            if (v.equals(target.getPublisher())) {
+                warn("Same as current value. No change made.");
+                break;
+            }
+            newData.setPublisher(v);
+            break;
         }
 
         sectionTitle("Edit Categories  (max 3)");
