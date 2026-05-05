@@ -11,26 +11,27 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class LibraryManager {
-    // Singleton Instance
+
+    // Singleton instance
     private static LibraryManager instance;
 
-    // Sistem verileri
-    private List<Book> inventory;
+    // Data stores
+    private List<Book>   inventory;
     private List<Member> members;
 
-    // Tasarım Deseni Yöneticileri
-    private CommandHistory commandHistory;
+    // Design pattern components
+    private CommandHistory  commandHistory;
     private ISearchStrategy searchStrategy;
-    private ISortStrategy sortStrategy;
+    private ISortStrategy   sortStrategy;
 
-    // Gizli Yapıcı Metot
+    // Private constructor (Singleton)
     private LibraryManager() {
-        this.inventory = new ArrayList<>();
-        this.members = new ArrayList<>();
+        this.inventory      = new ArrayList<>();
+        this.members        = new ArrayList<>();
         this.commandHistory = new CommandHistory();
     }
 
-    // Global Erişim Noktası
+    // Global access point
     public static LibraryManager getInstance() {
         if (instance == null) {
             instance = new LibraryManager();
@@ -38,11 +39,13 @@ public class LibraryManager {
         return instance;
     }
 
-    // --- TEMEL İŞLEMLER ---
+    // ----------------------------------------------------------
+    //  CORE OPERATIONS
+    // ----------------------------------------------------------
 
     public void addBook(Book book) {
         inventory.add(book);
-        System.out.println("Başarılı: '" + book.getTitle() + "' kütüphaneye eklendi.");
+        System.out.println("  [OK]  Book added: \"" + book.getTitle() + "\"");
     }
 
     public List<Book> getInventory() {
@@ -51,29 +54,35 @@ public class LibraryManager {
 
     public void registerMember(Member member) {
         members.add(member);
-        System.out.println("Başarılı: Yeni üye eklendi (" + member.getName() + ").");
+        System.out.println("  [OK]  Member registered: " + member.getName()
+            + "  (ID: " + member.getMemberId() + ")");
     }
 
     public Member getMemberById(String memberId) {
         for (Member m : members) {
-            if (m.getMemberId().equals(memberId)) {
-                return m;
-            }
+            if (m.getMemberId().equals(memberId)) return m;
         }
         return null;
     }
 
-    // --- ÖDÜNÇ ALMA MODÜLÜ ---
+    public List<Member> getMembers() {
+        return members;
+    }
+
+    // ----------------------------------------------------------
+    //  BORROW / RETURN MODULE
+    // ----------------------------------------------------------
 
     public boolean borrowBook(Book book, Member member) {
         if (book.isAvailable()) {
             book.setAvailable(false);
             book.incrementBorrowCount();
             member.borrowBook(book);
-            System.out.println("İşlem Başarılı: " + member.getName() + " adlı üye '" + book.getTitle() + "' kitabını ödünç aldı.");
+            System.out.println("  [OK]  \"" + book.getTitle()
+                + "\" checked out to " + member.getName() + ".");
             return true;
         } else {
-            System.out.println("Hata: Bu kitap şu an başkası tarafından okunuyor!");
+            System.out.println("  [ERR] This book is already checked out.");
             return false;
         }
     }
@@ -82,18 +91,20 @@ public class LibraryManager {
         if (!book.isAvailable() && member.getBorrowedBooks().contains(book)) {
             book.setAvailable(true);
             member.returnBook(book);
-            System.out.println("İşlem Başarılı: " + member.getName() + " adlı üye '" + book.getTitle() + "' kitabını iade etti.");
+            System.out.println("  [OK]  \"" + book.getTitle()
+                + "\" returned by " + member.getName() + ".");
             return true;
         } else {
-            System.out.println("Hata: İade işlemi başarısız. Kitap bu üyede değil veya zaten kütüphanede.");
+            System.out.println("  [ERR] Return failed: book not checked out by this member.");
             return false;
         }
     }
 
-    // --- DÜZENLEME MODÜLÜ (COMMAND PATTERN) ---
+    // ----------------------------------------------------------
+    //  MODIFICATION MODULE  (Command Pattern)
+    // ----------------------------------------------------------
 
     public void modifyBook(Book targetBook, Book newData) {
-        // Yeni bir komut oluştur ve geçmişe ekle (Komut kendi kendini çalıştıracak)
         ModifyBookCommand command = new ModifyBookCommand(targetBook, newData);
         commandHistory.push(command);
     }
@@ -102,7 +113,9 @@ public class LibraryManager {
         commandHistory.undo();
     }
 
-    // --- ARAMA MODÜLÜ (STRATEGY PATTERN) ---
+    // ----------------------------------------------------------
+    //  SEARCH MODULE  (Strategy Pattern)
+    // ----------------------------------------------------------
 
     public void setSearchStrategy(ISearchStrategy searchStrategy) {
         this.searchStrategy = searchStrategy;
@@ -114,18 +127,13 @@ public class LibraryManager {
 
     public List<Book> searchBooks(String keyword) {
         if (searchStrategy == null) {
-            System.out.println("Hata: Lütfen önce bir arama stratejisi belirleyin.");
+            System.out.println("  [ERR] No search strategy set.");
             return new ArrayList<>();
         }
-
-        // 1. Belirlenen stratejiye göre filtrele
         List<Book> results = searchStrategy.search(inventory, keyword);
-
-        // 2. Eğer bir sıralama stratejisi belirlenmişse sonuçları sırala
         if (sortStrategy != null && !results.isEmpty()) {
             sortStrategy.sort(results);
         }
-
         return results;
     }
 }

@@ -2,22 +2,27 @@ package com.library.command;
 
 import com.library.model.Book;
 
+/**
+ * Concrete command that modifies a book's fields and supports undo
+ * by restoring a deep-copy backup taken before execution.
+ */
 public class ModifyBookCommand implements ICommand {
-    private Book targetBook; // Değiştirilecek asıl kitap
-    private Book backupBook; // Geri alma işlemi için tutulan kopya
-    private Book newData;    // Kullanıcının girdiği yeni veriler
+
+    private Book targetBook; // The actual book object to modify
+    private Book backupBook; // Snapshot taken before execution (for undo)
+    private Book newData;    // The new field values to apply
 
     public ModifyBookCommand(Book targetBook, Book newData) {
         this.targetBook = targetBook;
-        this.newData = newData;
+        this.newData    = newData;
     }
 
     @Override
     public void execute() {
-        // 1. İşlemden önce asıl kitabın derin kopyasını al (Yedekle)
+        // 1. Snapshot current state (deep copy)
         this.backupBook = new Book(targetBook);
 
-        // 2. Yeni verileri asıl kitabın üzerine yaz
+        // 2. Apply new data
         targetBook.setTitle(newData.getTitle());
         targetBook.setAuthor(newData.getAuthor());
         targetBook.setPublicationYear(newData.getPublicationYear());
@@ -27,13 +32,12 @@ public class ModifyBookCommand implements ICommand {
         targetBook.setCategories(newData.getCategories());
         targetBook.setTags(newData.getTags());
 
-        System.out.println("Başarılı: '" + targetBook.getTitle() + "' adlı kitabın bilgileri güncellendi.");
+        System.out.println("  [OK]  Book updated: \"" + targetBook.getTitle() + "\"");
     }
 
     @Override
     public void undo() {
         if (backupBook != null) {
-            // Yedekteki eski verileri asıl kitabın üzerine geri yaz
             targetBook.setTitle(backupBook.getTitle());
             targetBook.setAuthor(backupBook.getAuthor());
             targetBook.setPublicationYear(backupBook.getPublicationYear());
@@ -43,7 +47,7 @@ public class ModifyBookCommand implements ICommand {
             targetBook.setCategories(backupBook.getCategories());
             targetBook.setTags(backupBook.getTags());
 
-            System.out.println("Geri Alma Başarılı: Kitap eski haline döndürüldü.");
+            System.out.println("  [OK]  Undo successful. Book restored to previous state.");
         }
     }
 }
